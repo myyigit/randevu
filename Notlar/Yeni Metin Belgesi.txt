@@ -1,0 +1,3 @@
+süper kullanıcı ekleme 
+
+UPDATE users SET role = 'superadmin' WHERE email = 'yeni@admin.com';
