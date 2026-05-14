@@ -13,25 +13,24 @@ export default function ClientWater() {
   const GOAL = 2500;
 
   useEffect(() => {
-    if (user?.id) fetchToday();
-  }, [user?.id]);
-
-  async function fetchToday() {
+    if (!user?.id) return;
+    const userId = user.id;
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const { data } = await supabase
+    supabase
       .from('water_logs')
       .select('*')
-      .eq('client_id', user.id)
+      .eq('client_id', userId)
       .gte('logged_at', today.toISOString())
       .lt('logged_at', tomorrow.toISOString())
-      .order('logged_at', { ascending: false });
-
-    setWaterLogs(data || []);
-    setTotal((data || []).reduce((s, w) => s + w.amount_ml, 0));
-    setLoading(false);
-  }
+      .order('logged_at', { ascending: false })
+      .then(({ data }) => {
+        setWaterLogs(data || []);
+        setTotal((data || []).reduce((s, w) => s + w.amount_ml, 0));
+        setLoading(false);
+      });
+  }, [user?.id]);
 
   async function addWater(ml) {
     setSaving(true);
@@ -40,7 +39,7 @@ export default function ClientWater() {
       p_amount_ml: ml,
     });
     if (!error) {
-      const newEntry = { id: Date.now(), amount_ml: ml, logged_at: new Date().toISOString() };
+      const newEntry = { id: crypto.randomUUID(), amount_ml: ml, logged_at: new Date().toISOString() };
       setWaterLogs(prev => [newEntry, ...prev]);
       setTotal(prev => prev + ml);
     }

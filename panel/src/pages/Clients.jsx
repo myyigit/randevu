@@ -57,6 +57,7 @@ export default function Clients() {
   const [editClient, setEditClient]   = useState(null);
   const [deleteClient, setDeleteClient] = useState(null);
   const [showMeasure, setShowMeasure] = useState(false);
+  const [resettingPw, setResettingPw] = useState(false);
 
   // ── Seçili danışan hookları ────────────────────────────────────────────────
   const { logs: realLogs, loading: logsLoading } = useMealLogs(isDemo ? null : selectedClient?.id);
@@ -209,6 +210,22 @@ export default function Clients() {
     showMsg('📏 Ölçüm kaydedildi!');
   }
 
+  // ── CRUD: Şifre Sıfırla ──────────────────────────────────────────────────
+  async function handleResetPassword() {
+    if (!selectedClient?.id) return;
+    if (!window.confirm(`${selectedClient.name} adlı danışanın şifresi 12345678 olarak sıfırlanacak. Onaylıyor musunuz?`)) return;
+    setResettingPw(true);
+    try {
+      const { error } = await supabase.rpc('reset_client_password', { p_client_id: selectedClient.id });
+      if (error) throw error;
+      showMsg('🔑 Şifre 12345678 olarak sıfırlandı. Danışan ilk girişte değiştirmek zorunda kalacak.');
+    } catch (e) {
+      showMsg('Sıfırlama hatası: ' + e.message, 'error');
+    } finally {
+      setResettingPw(false);
+    }
+  }
+
 
   const filtered = clientList.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -282,9 +299,18 @@ export default function Clients() {
                 </div>
               </div>
             </div>
-            <div style={{ display:'flex', gap:8 }}>
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
               <button className="btn btn-ghost" onClick={() => setEditClient(selectedClient)}>✏️ Düzenle</button>
               <button className="btn btn-ghost" style={{ color:'var(--danger)' }} onClick={() => setDeleteClient(selectedClient)}>🗑️ Sil</button>
+              <button
+                className="btn btn-ghost"
+                style={{ color:'var(--warning, #f59e0b)' }}
+                onClick={handleResetPassword}
+                disabled={resettingPw || isDemo}
+                title="Şifreyi 12345678 olarak sıfırla"
+              >
+                {resettingPw ? '⏳' : '🔑'} Şifre Sıfırla
+              </button>
               <button className="btn btn-primary">📄 Rapor</button>
             </div>
           </div>
