@@ -26,10 +26,8 @@ app.use('/api/notifications', notificationRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/appointments', appointmentRouter);
 
-if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`🚀 DietSync API running on http://localhost:${PORT}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`🚀 DietSync API running on http://localhost:${PORT}`);
+});
 
 export default app;

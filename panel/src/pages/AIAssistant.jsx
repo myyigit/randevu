@@ -34,8 +34,7 @@ export default function AIAssistant() {
 
     try {
       // API'ye gönder (eğer backend çalışıyorsa)
-      const baseUrl = import.meta.env.PROD ? '' : 'http://localhost:3001';
-      const res = await fetch(`${baseUrl}/api/ai/chat`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
