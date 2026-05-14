@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
         .from('dietitian_applications')
         .select('status')
         .eq('auth_user_id', userId)
-        .single();
+        .maybeSingle();
       if (data) setApplicationStatus(data.status);
     } catch { /* başvuru yoksa null kalır */ }
   }
@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('*, dietitians(*)')
+        .select('*, dietitians(*), must_change_password')
         .eq('id', userId)
         .single();
 
