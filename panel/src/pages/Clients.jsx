@@ -229,6 +229,81 @@ export default function Clients() {
 
   const filtered = clientList.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
+  function handleGenerateReport() {
+    if (!selectedClient) return;
+    const c = selectedClient;
+    const m = measurements;
+    const logs = mealLogs;
+
+    const latestWeight = m.length > 0 ? m[0].weight_kg : '-';
+    const latestFat = m.length > 0 ? (m[0].body_fat_pct || '-') : '-';
+    const latestWaist = m.length > 0 ? (m[0].waist_cm || '-') : '-';
+
+    const mealRows = logs.slice(0, 20).map(log =>
+      `<tr>
+        <td>${new Date(log.logged_at).toLocaleDateString('tr-TR')}</td>
+        <td>${mealLabels[log.meal_type] || log.meal_type}</td>
+        <td>${log.note || '-'}</td>
+        <td>${log.dietitian_feedback || '-'}</td>
+      </tr>`
+    ).join('');
+
+    const measureRows = m.map(row =>
+      `<tr>
+        <td>${new Date(row.measured_at).toLocaleDateString('tr-TR')}</td>
+        <td>${row.weight_kg} kg</td>
+        <td>${row.body_fat_pct || '-'}%</td>
+        <td>${row.muscle_kg || '-'} kg</td>
+        <td>${row.waist_cm || '-'} cm</td>
+      </tr>`
+    ).join('');
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>DietSync - ${c.name} Raporu</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 32px; color: #1e293b; }
+  h1 { color: #22c55e; border-bottom: 2px solid #22c55e; padding-bottom: 8px; }
+  h2 { color: #334155; margin-top: 32px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; font-size: 13px; }
+  th { background: #f1f5f9; font-weight: 600; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .info-item { background: #f8fafc; padding: 10px 14px; border-radius: 6px; }
+  .info-label { font-size: 11px; color: #64748b; text-transform: uppercase; }
+  .info-value { font-size: 15px; font-weight: 600; margin-top: 2px; }
+  .footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+  @media print { body { padding: 0; } }
+</style>
+</head><body>
+<h1>DietSync - Daniasan Raporu</h1>
+<p style="color:#64748b">Olusturulma: ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+
+<h2>Daniasan Bilgileri</h2>
+<div class="info-grid">
+  <div class="info-item"><div class="info-label">Ad Soyad</div><div class="info-value">${c.name}</div></div>
+  <div class="info-item"><div class="info-label">E-posta</div><div class="info-value">${c.email || '-'}</div></div>
+  <div class="info-item"><div class="info-label">Hedef</div><div class="info-value">${c.goal || '-'}</div></div>
+  <div class="info-item"><div class="info-label">Aktivite</div><div class="info-value">${activityLabels[c.activity_level] || '-'}</div></div>
+  <div class="info-item"><div class="info-label">Son Kilo</div><div class="info-value">${latestWeight} kg</div></div>
+  <div class="info-item"><div class="info-label">Vuc. Yag</div><div class="info-value">${latestFat}%</div></div>
+</div>
+
+<h2>Olcum Gecmisi</h2>
+${measureRows ? `<table><thead><tr><th>Tarih</th><th>Kilo</th><th>Yag %</th><th>Kas</th><th>Bel</th></tr></thead><tbody>${measureRows}</tbody></table>` : '<p style="color:#94a3b8">Henuz olcum kaydı yok.</p>'}
+
+<h2>Son Ogun Kayitlari</h2>
+${mealRows ? `<table><thead><tr><th>Tarih</th><th>Ogun</th><th>Detay</th><th>Geri Bildirim</th></tr></thead><tbody>${mealRows}</tbody></table>` : '<p style="color:#94a3b8">Henuz ogun kaydı yok.</p>'}
+
+<div class="footer">DietSync Profesyonel Diyet Yonetim Sistemi &copy; ${new Date().getFullYear()}</div>
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    w.onload = () => w.print();
+  }
+
   return (
     <div className="split-view">
 
@@ -311,7 +386,7 @@ export default function Clients() {
               >
                 {resettingPw ? '⏳' : '🔑'} Şifre Sıfırla
               </button>
-              <button className="btn btn-primary">📄 Rapor</button>
+              <button className="btn btn-primary" onClick={handleGenerateReport}>&#x1F4C4; Rapor</button>
             </div>
           </div>
 

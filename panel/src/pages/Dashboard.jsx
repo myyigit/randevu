@@ -202,9 +202,47 @@ export default function Dashboard() {
   useEffect(() => {
     if (isDemo) return;
     setLoading(true);
-    fetchDashboardData().finally(() => setLoading(false));
+    fetchDashboardData()
+      .then(() => fetchAlerts())
+      .finally(() => setLoading(false));
     fetchClients();
   }, [activeDietitianId]);
+
+  async function fetchAlerts() {
+    if (!activeDietitianId) return;
+    // Otomatik uyari olustur
+    try { await supabase.rpc('generate_dietitian_alerts', { p_dietitian_id: activeDietitianId }); } catch {}
+    // Uyarilari cek
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', activeDietitianId)
+      .eq('is_read', false)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (data?.length) {
+      setAlerts(data.map(n => ({
+        id: n.id,
+        icon: n.icon === 'warning' ? '\u26A0\uFE0F' : n.icon === 'water' ? '\uD83D\uDCA7' : n.icon === 'scale' ? '\u2696\uFE0F' : '\uD83D\uDD14',
+        text: n.message || n.title,
+        bold: n.title.split(' - ')[0],
+        time: getTimeAgo(n.created_at),
+      })));
+      setStats(s => ({ ...s, criticalAlerts: data.length }));
+    } else if (!isDemo) {
+      setAlerts([]);
+      setStats(s => ({ ...s, criticalAlerts: 0 }));
+    }
+  }
+
+  function getTimeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins} dk once`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} saat once`;
+    return `${Math.floor(hours / 24)} gun once`;
+  }
 
   async function fetchClients() {
     if (!activeDietitianId) return;

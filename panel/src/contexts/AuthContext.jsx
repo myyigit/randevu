@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase, isDemoMode } from '../lib/supabase';
+import { AuthContext } from './authContextValue';
 
-export const AuthContext = createContext({});
 
 // Demo mod profili
 const DEMO_PROFILE = {
