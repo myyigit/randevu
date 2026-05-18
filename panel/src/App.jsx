@@ -8,6 +8,7 @@ import Appointments from './pages/Appointments';
 import DietPlans from './pages/DietPlans';
 import AIAssistant from './pages/AIAssistant';
 import MealLogs from './pages/MealLogs';
+import Settings from './pages/Settings';
 import SuperadminDashboard from './pages/SuperadminDashboard';
 import RegisterPage from './pages/RegisterPage';
 import PendingApproval from './pages/PendingApproval';
@@ -64,13 +65,17 @@ function Sidebar() {
           <span className="nav-icon">&#x1F916;</span>
           AI Asistan
         </NavLink>
+        <NavLink to="/settings" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+          <span className="nav-icon">&#x2699;&#xFE0F;</span>
+          Ayarlar
+        </NavLink>
       </nav>
 
-      <div className="sidebar-user" onClick={signOut} style={{cursor: 'pointer'}} title="Cikis yap">
+      <div className="sidebar-user" onClick={signOut} style={{cursor: 'pointer'}} title="Çıkış yap">
         <div className="user-avatar">{initials}</div>
         <div className="user-info">
-          <div className="user-name">{activeProfile?.name || 'Yukleniyor...'}</div>
-          <div className="user-role">{impersonatedDietitian ? 'Yonetilen Hesap' : 'Diyetisyen'}</div>
+          <div className="user-name">{activeProfile?.name || 'Yükleniyor...'}</div>
+          <div className="user-role">{impersonatedDietitian ? 'Yönetilen Hesap' : 'Diyetisyen'}</div>
         </div>
         <span style={{color: 'var(--text-muted)', fontSize: 14}}>&#x1F6AA;</span>
       </div>
@@ -209,8 +214,8 @@ function AppContent() {
     return <PendingApproval status={applicationStatus} />;
   }
 
-  // Danışan: zorunlu şifre değiştirme
-  if (profile?.role === 'client' && profile?.must_change_password) {
+  // Zorunlu şifre değiştirme (danışan veya diyetisyen)
+  if (profile?.must_change_password) {
     return <ChangePassword />;
   }
 
@@ -290,14 +295,20 @@ function AppContent() {
                 <div className="page-content"><AIAssistant /></div>
               </>
             } />
+            <Route path="/settings" element={
+              <>
+                <TopBar title="Ayarlar" subtitle="Profil ve şifre yönetimi" />
+                <div className="page-content"><Settings /></div>
+              </>
+            } />
             <Route path="*" element={
               <>
                 <TopBar title="Yapım Aşamasında" />
                 <div className="page-content">
                   <div className="empty-state">
                     <div className="empty-icon">&#x1F6A7;</div>
-                    <h3>Bu sayfa henuz hazirlaniyor</h3>
-                    <p>Yakinda burada harika seyler olacak!</p>
+                    <h3>Bu sayfa henüz hazırlanıyor</h3>
+                    <p>Yakında burada harika şeyler olacak!</p>
                   </div>
                 </div>
               </>

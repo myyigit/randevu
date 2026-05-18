@@ -94,6 +94,17 @@ export default function SuperadminDashboard() {
     }
   }
 
+  async function resetDietitianPassword(dietitian) {
+    if (!confirm(`${dietitian.name || dietitian.email} adlı diyetisyenin şifresi "12345678" olarak sıfırlanacak. Devam edilsin mi?`)) return;
+    try {
+      const { error } = await supabase.rpc('reset_dietitian_password', { p_dietitian_id: dietitian.id });
+      if (error) throw error;
+      showToast('Şifre sıfırlandı. İlk girişte değiştirmesi gerekecek.');
+    } catch (err) {
+      showToast('Hata: ' + err.message, 'error');
+    }
+  }
+
   function handleImpersonate(dietitian) {
     setImpersonatedDietitian(dietitian);
   }
@@ -176,6 +187,9 @@ export default function SuperadminDashboard() {
                       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                         <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(d.id, d.is_active)}>
                           {d.is_active ? 'Pasife Al' : 'Aktifleştir'}
+                        </button>
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--warning)' }} onClick={() => resetDietitianPassword(d)} title="Şifreyi 12345678 olarak sıfırla">
+                          🔑 Şifre Sıfırla
                         </button>
                         <button className="btn btn-primary btn-sm" onClick={() => handleImpersonate(d)} disabled={!d.is_active}>
                           Giriş Yap ➡️
