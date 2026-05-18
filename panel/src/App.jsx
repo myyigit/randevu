@@ -10,6 +10,7 @@ import DietPlans from './pages/DietPlans';
 import AIAssistant from './pages/AIAssistant';
 import MealLogs from './pages/MealLogs';
 import Settings from './pages/Settings';
+import Reports from './pages/Reports';
 import SuperadminDashboard from './pages/SuperadminDashboard';
 import RegisterPage from './pages/RegisterPage';
 import PendingApproval from './pages/PendingApproval';
@@ -318,6 +319,12 @@ function AppContent() {
               <>
                 <TopBar title="Besin Günlüğü" subtitle="Danışan öğün kayıtları ve su takibi" />
                 <div className="page-content"><MealLogs /></div>
+              </>
+            } />
+            <Route path="/reports" element={
+              <>
+                <TopBar title="Raporlar" subtitle="Detaylı istatistik ve analizler" />
+                <div className="page-content"><Reports /></div>
               </>
             } />
             <Route path="/ai-assistant" element={
