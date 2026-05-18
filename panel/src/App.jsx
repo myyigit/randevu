@@ -88,7 +88,7 @@ function TopBar({ title, subtitle }) {
       <div className="topbar-right">
         <div className="search-box">
           <span>&#x1F50D;</span>
-          <input type="text" placeholder="Daniasan, plan, besin ara..." />
+          <input type="text" placeholder="Danışan, plan, besin ara..." />
         </div>
         <button className="notif-btn">
           &#x1F514;
@@ -105,9 +105,9 @@ function ImpersonationBanner() {
 
   return (
     <div style={{ background: '#f59e0b', color: '#fff', padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 500 }}>
-      <div>Simdi <strong>{impersonatedDietitian.name}</strong> adli diyetisyenin hesabinasiniz. Yapilan islemler bu hesaba kaydedilir.</div>
+      <div>Şimdi <strong>{impersonatedDietitian.name}</strong> adlı diyetisyenin hesabındasınız. Yapılan işlemler bu hesaba kaydedilir.</div>
       <button onClick={() => setImpersonatedDietitian(null)} style={{ background: 'rgba(0,0,0,0.2)', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}>
-        Super Admin Paneline Don
+        Süper Admin Paneline Dön
       </button>
     </div>
   );
@@ -209,12 +209,12 @@ function AppContent() {
     return <PendingApproval status={applicationStatus} />;
   }
 
-  // Daniasan: zorunlu sifre degistirme
+  // Danışan: zorunlu şifre değiştirme
   if (profile?.role === 'client' && profile?.must_change_password) {
     return <ChangePassword />;
   }
 
-  // Daniasan portali
+  // Danışan portalı
   if (profile?.role === 'client') {
     return <ClientPortal />;
   }
@@ -224,9 +224,9 @@ function AppContent() {
       <div className="login-container">
         <div style={{textAlign: 'center', background: 'var(--surface)', padding: 48, borderRadius: 'var(--radius-lg)'}}>
           <div style={{fontSize: 48, marginBottom: 16}}>&#x1F512;</div>
-          <h2 style={{marginBottom: 8}}>Hesabiniz Pasife Alinmistir</h2>
-          <p style={{color: 'var(--text-secondary)', marginBottom: 24}}>Lutfen sistem yoneticisiyle iletisime gecin.</p>
-          <button className="btn btn-primary" onClick={signOut}>Cikis Yap</button>
+          <h2 style={{marginBottom: 8}}>Hesabınız Pasife Alınmıştır</h2>
+          <p style={{color: 'var(--text-secondary)', marginBottom: 24}}>Lütfen sistem yöneticisiyle iletişime geçin.</p>
+          <button className="btn btn-primary" onClick={signOut}>Çıkış Yap</button>
         </div>
       </div>
     );
@@ -240,7 +240,7 @@ function AppContent() {
             <div className="logo-icon" style={{ width: 32, height: 32, fontSize: 16, borderRadius: 8 }}>DS</div>
             <strong style={{ fontSize: 18 }}>DietSync Superadmin</strong>
           </div>
-          <button className="btn btn-ghost" onClick={signOut}>Cikis Yap</button>
+          <button className="btn btn-ghost" onClick={signOut}>Çıkış Yap</button>
         </div>
         <SuperadminDashboard />
       </div>
@@ -256,43 +256,43 @@ function AppContent() {
           <Routes>
             <Route path="/" element={
               <>
-                <TopBar title="Dashboard" subtitle={new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} />
+                <TopBar title="Gösterge Paneli" subtitle={new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} />
                 <div className="page-content"><Dashboard /></div>
               </>
             } />
             <Route path="/clients" element={
               <>
-                <TopBar title="Danisanlar" subtitle="Daniasan listesi ve detaylari" />
+                <TopBar title="Danışanlar" subtitle="Danışan listesi ve detayları" />
                 <div className="page-content" style={{padding: 0}}><Clients /></div>
               </>
             } />
             <Route path="/appointments" element={
               <>
-                <TopBar title="Randevular" subtitle="Randevu yonetimi ve risk analizi" />
+                <TopBar title="Randevular" subtitle="Randevu yönetimi ve risk analizi" />
                 <div className="page-content"><Appointments /></div>
               </>
             } />
             <Route path="/diet-plans" element={
               <>
-                <TopBar title="Diyet Planlari" subtitle="Plan olusturma ve yonetimi" />
+                <TopBar title="Diyet Planları" subtitle="Plan oluşturma ve yönetimi" />
                 <div className="page-content"><DietPlans /></div>
               </>
             } />
             <Route path="/meal-logs" element={
               <>
-                <TopBar title="Besin Gunlugu" subtitle="Daniasan ogün kayitlari ve su takibi" />
+                <TopBar title="Besin Günlüğü" subtitle="Danışan öğün kayıtları ve su takibi" />
                 <div className="page-content"><MealLogs /></div>
               </>
             } />
             <Route path="/ai-assistant" element={
               <>
-                <TopBar title="AI Asistan" subtitle="Akilli beslenme asistaniniz" />
+                <TopBar title="AI Asistan" subtitle="Akıllı beslenme asistanınız" />
                 <div className="page-content"><AIAssistant /></div>
               </>
             } />
             <Route path="*" element={
               <>
-                <TopBar title="Yapim Asamasinda" />
+                <TopBar title="Yapım Aşamasında" />
                 <div className="page-content">
                   <div className="empty-state">
                     <div className="empty-icon">&#x1F6A7;</div>

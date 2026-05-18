@@ -202,10 +202,10 @@ export default function Dashboard() {
   function getTimeAgo(dateStr) {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 60) return mins + ' dk once';
+    if (mins < 60) return mins + ' dk önce';
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return hours + ' saat once';
-    return Math.floor(hours / 24) + ' gun once';
+    if (hours < 24) return hours + ' saat önce';
+    return Math.floor(hours / 24) + ' gün önce';
   }
 
   function showToast(msg, type = 'success') {
@@ -220,7 +220,7 @@ export default function Dashboard() {
       .select('id, users(name)')
       .eq('dietitian_id', activeDietitianId)
       .order('created_at', { ascending: false });
-    if (data) setClients(data.map(c => ({ id: c.id, name: c.users?.name || 'Isimsiz' })));
+    if (data) setClients(data.map(c => ({ id: c.id, name: c.users?.name || 'İsimsiz' })));
   }
 
   async function fetchAlerts() {
@@ -266,7 +266,7 @@ export default function Dashboard() {
           id: a.id,
           time: new Date(a.scheduled_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
           name: a.clients?.users?.name || 'Bilinmiyor',
-          type: a.type === 'in_person' ? 'Yuz yuze' : 'Online',
+          type: a.type === 'in_person' ? 'Yüz yüze' : 'Online',
           status: a.status,
           initials: (a.clients?.users?.name || 'XX').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
         })));
@@ -284,13 +284,13 @@ export default function Dashboard() {
           id: m.id,
           emoji: mealEmojis[m.meal_type] || '\uD83C\uDF7D',
           client: m.clients?.users?.name?.split(' ').map((n, i) => i === 0 ? n : n[0] + '.').join(' ') || '?',
-          meal: (m.meal_type === 'breakfast' ? 'Kahvalti' : m.meal_type === 'lunch' ? 'Ogle' : m.meal_type === 'dinner' ? 'Aksam' : 'Ara Ogun') + ' - ' + (m.note || 'Aciklama yok'),
+          meal: (m.meal_type === 'breakfast' ? 'Kahvaltı' : m.meal_type === 'lunch' ? 'Öğle' : m.meal_type === 'dinner' ? 'Akşam' : 'Ara Öğün') + ' — ' + (m.note || 'Açıklama yok'),
           time: new Date(m.logged_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
           feedbackDone: !!m.dietitian_feedback,
         })));
       }
     } catch (err) {
-      console.error('Dashboard veri hatasi:', err);
+      console.error('Dashboard veri hatası:', err);
     }
   }
 

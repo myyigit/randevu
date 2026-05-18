@@ -273,26 +273,26 @@ export default function Clients() {
   @media print { body { padding: 0; } }
 </style>
 </head><body>
-<h1>DietSync - Daniasan Raporu</h1>
-<p style="color:#64748b">Olusturulma: ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+<h1>DietSync - Danışan Raporu</h1>
+<p style="color:#64748b">Oluşturulma: ${new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
 
-<h2>Daniasan Bilgileri</h2>
+<h2>Danışan Bilgileri</h2>
 <div class="info-grid">
   <div class="info-item"><div class="info-label">Ad Soyad</div><div class="info-value">${c.name}</div></div>
   <div class="info-item"><div class="info-label">E-posta</div><div class="info-value">${c.email || '-'}</div></div>
   <div class="info-item"><div class="info-label">Hedef</div><div class="info-value">${c.goal || '-'}</div></div>
   <div class="info-item"><div class="info-label">Aktivite</div><div class="info-value">${activityLabels[c.activity_level] || '-'}</div></div>
   <div class="info-item"><div class="info-label">Son Kilo</div><div class="info-value">${latestWeight} kg</div></div>
-  <div class="info-item"><div class="info-label">Vuc. Yag</div><div class="info-value">${latestFat}%</div></div>
+  <div class="info-item"><div class="info-label">Vüc. Yağ</div><div class="info-value">${latestFat}%</div></div>
 </div>
 
-<h2>Olcum Gecmisi</h2>
-${measureRows ? `<table><thead><tr><th>Tarih</th><th>Kilo</th><th>Yag %</th><th>Kas</th><th>Bel</th></tr></thead><tbody>${measureRows}</tbody></table>` : '<p style="color:#94a3b8">Henuz olcum kaydı yok.</p>'}
+<h2>Ölçüm Geçmişi</h2>
+${measureRows ? `<table><thead><tr><th>Tarih</th><th>Kilo</th><th>Yağ %</th><th>Kas</th><th>Bel</th></tr></thead><tbody>${measureRows}</tbody></table>` : '<p style="color:#94a3b8">Henüz ölçüm kaydı yok.</p>'}
 
-<h2>Son Ogun Kayitlari</h2>
-${mealRows ? `<table><thead><tr><th>Tarih</th><th>Ogun</th><th>Detay</th><th>Geri Bildirim</th></tr></thead><tbody>${mealRows}</tbody></table>` : '<p style="color:#94a3b8">Henuz ogun kaydı yok.</p>'}
+<h2>Son Öğün Kayıtları</h2>
+${mealRows ? `<table><thead><tr><th>Tarih</th><th>Öğün</th><th>Detay</th><th>Geri Bildirim</th></tr></thead><tbody>${mealRows}</tbody></table>` : '<p style="color:#94a3b8">Henüz öğün kaydı yok.</p>'}
 
-<div class="footer">DietSync Profesyonel Diyet Yonetim Sistemi &copy; ${new Date().getFullYear()}</div>
+<div class="footer">DietSync Profesyonel Diyet Yönetim Sistemi &copy; ${new Date().getFullYear()}</div>
 </body></html>`;
 
     const w = window.open('', '_blank');
@@ -423,24 +423,40 @@ ${mealRows ? `<table><thead><tr><th>Tarih</th><th>Ogun</th><th>Detay</th><th>Ger
                 </div>
 
                 <div className="card">
-                  <div className="card-header"><h3>🥧 Makro Dağılımı</h3></div>
+                  <div className="card-header"><h3>&#x1F967; Makro Dağılımı</h3></div>
                   <div className="card-body" style={{ display:'flex',alignItems:'center',justifyContent:'center' }}>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie data={DEMO_MACROS} cx="50%" cy="50%" innerRadius={55} outerRadius={80} dataKey="value" paddingAngle={4}>
-                          {DEMO_MACROS.map((e,i) => <Cell key={i} fill={e.color} />)}
-                        </Pie>
-                        <Tooltip contentStyle={{ background:'#1E293B',border:'1px solid #334155',borderRadius:8,color:'#F1F5F9' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
-                      {DEMO_MACROS.map(m => (
-                        <div key={m.name} style={{ display:'flex',alignItems:'center',gap:8,fontSize:13 }}>
-                          <span style={{ width:10,height:10,borderRadius:'50%',background:m.color,display:'inline-block' }} />
-                          {m.name}: {m.value}%
-                        </div>
-                      ))}
-                    </div>
+                    {(() => {
+                      const macroData = activePlan?.protein_pct
+                        ? [
+                            { name: 'Protein', value: activePlan.protein_pct, color: '#22C55E' },
+                            { name: 'Karbonhidrat', value: activePlan.carb_pct, color: '#3B82F6' },
+                            { name: 'Yag', value: activePlan.fat_pct, color: '#F59E0B' },
+                          ]
+                        : DEMO_MACROS;
+                      return (
+                        <>
+                          <ResponsiveContainer width="100%" height={200}>
+                            <PieChart>
+                              <Pie data={macroData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} dataKey="value" paddingAngle={4}>
+                                {macroData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                              </Pie>
+                              <Tooltip contentStyle={{ background:'#1E293B',border:'1px solid #334155',borderRadius:8,color:'#F1F5F9' }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
+                            {macroData.map(m => (
+                              <div key={m.name} style={{ display:'flex',alignItems:'center',gap:8,fontSize:13 }}>
+                                <span style={{ width:10,height:10,borderRadius:'50%',background:m.color,display:'inline-block' }} />
+                                {m.name}: {m.value}%
+                              </div>
+                            ))}
+                            {!activePlan?.protein_pct && (
+                              <div style={{ fontSize:11,color:'var(--text-muted)',marginTop:4 }}>* Varsayılan değerler</div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

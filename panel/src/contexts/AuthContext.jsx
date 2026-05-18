@@ -36,18 +36,18 @@ export function AuthProvider({ children }) {
       if (data) {
         setProfile(data);
       } else {
-        console.warn('Profil bulunamadi, fallback profil kullaniliyor:', error?.message);
+        console.warn('Profil bulunamadı, fallback profil kullanılıyor:', error?.message);
         const { data: { user: authUser } } = await supabase.auth.getUser();
         setProfile({
           id: userId,
-          name: authUser?.user_metadata?.name || authUser?.email?.split('@')[0] || 'Kullanici',
+          name: authUser?.user_metadata?.name || authUser?.email?.split('@')[0] || 'Kullanıcı',
           email: authUser?.email,
           role: 'dietitian',
         });
       }
     } catch (err) {
-      console.error('Profil cekme hatasi:', err);
-      setProfile({ id: userId, name: 'Kullanici', role: 'dietitian' });
+      console.error('Profil çekme hatası:', err);
+      setProfile({ id: userId, name: 'Kullanıcı', role: 'dietitian' });
     }
   }
 
