@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 const QUICK_ACTIONS = [
   { icon: '📊', label: 'Haftalık Rapor', prompt: 'Tüm danışanlarımın son haftalık performans özetini çıkar' },

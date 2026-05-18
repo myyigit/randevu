@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { supabase, isDemoMode } from '../lib/supabase';
 
 const DEMO_STATS = { todayAppointments: 8, activeClients: 42, pendingLogs: 28, criticalAlerts: 4 };

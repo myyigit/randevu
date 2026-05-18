@@ -1,4 +1,4 @@
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 export default function PendingApproval({ status = 'pending' }) {
   const { signOut, profile } = useAuth();

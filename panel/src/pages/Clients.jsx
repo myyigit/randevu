@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { useClients, useMealLogs, useMeasurements, useDietPlans } from '../hooks/useSupabase';
 import { supabase, isDemoMode } from '../lib/supabase';
 import { ClientFormModal, MeasurementModal, ConfirmDeleteModal } from '../components/ClientModals';

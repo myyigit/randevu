@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 
 const MEAL_TYPES = [
   { value: 'breakfast', label: 'Kahvaltı', icon: '🌅' },

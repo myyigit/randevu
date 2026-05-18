@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/useAuth';
 
 const STATUS_MAP = {
   pending:   { label: 'Bekliyor',  color: '#eab308', bg: 'rgba(234,179,8,0.15)' },

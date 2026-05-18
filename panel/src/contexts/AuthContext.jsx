@@ -1,27 +1,72 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { supabase, isDemoMode } from '../lib/supabase';
 
-const AuthContext = createContext({});
+export const AuthContext = createContext({});
 
 // Demo mod profili
 const DEMO_PROFILE = {
   id: 'demo-dietitian-001',
-  name: 'Dr. Ayşe Kaya',
+  name: 'Dr. Ayse Kaya',
   email: 'ayse@dietsync.com',
   role: 'dietitian',
-  dietitians: { clinic_name: 'DietSync Kliniği', license_no: 'DYT-2024-001' },
+  dietitians: { clinic_name: 'DietSync Klinigi', license_no: 'DYT-2024-001' },
 };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(isDemoMode ? { id: DEMO_PROFILE.id } : null);
   const [profile, setProfile] = useState(isDemoMode ? DEMO_PROFILE : null);
   const [loading, setLoading] = useState(!isDemoMode);
-  const [applicationStatus, setApplicationStatus] = useState(null); // 'pending' | 'approved' | 'rejected' | null
+  const [applicationStatus, setApplicationStatus] = useState(null);
+  const [impersonatedDietitian, setImpersonatedDietitian] = useState(null);
+
+  // Aktif ID
+  const activeDietitianId = impersonatedDietitian?.id || user?.id;
+
+  // -- Helper fonksiyonlar (useEffect'ten once tanimlanmali) --
+
+  async function fetchProfile(userId) {
+    if (isDemoMode) return;
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*, dietitians(*), must_change_password')
+        .eq('id', userId)
+        .single();
+
+      if (data) {
+        setProfile(data);
+      } else {
+        console.warn('Profil bulunamadi, fallback profil kullaniliyor:', error?.message);
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        setProfile({
+          id: userId,
+          name: authUser?.user_metadata?.name || authUser?.email?.split('@')[0] || 'Kullanici',
+          email: authUser?.email,
+          role: 'dietitian',
+        });
+      }
+    } catch (err) {
+      console.error('Profil cekme hatasi:', err);
+      setProfile({ id: userId, name: 'Kullanici', role: 'dietitian' });
+    }
+  }
+
+  async function checkApplicationStatus(userId) {
+    try {
+      const { data } = await supabase
+        .from('dietitian_applications')
+        .select('status')
+        .eq('auth_user_id', userId)
+        .maybeSingle();
+      if (data) setApplicationStatus(data.status);
+    } catch { /* basvuru yoksa null kalir */ }
+  }
+
+  // -- Effects --
 
   useEffect(() => {
     if (isDemoMode) return;
 
-    // 5 saniye timeout — Supabase yanıt vermezse login göster
     const timeout = setTimeout(() => setLoading(false), 5000);
 
     supabase.auth.getSession()
@@ -58,50 +103,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const [impersonatedDietitian, setImpersonatedDietitian] = useState(null);
-
-  // Başvuru durumunu kontrol et (henüz users tablosunda olmayan pending applicants için)
-  async function checkApplicationStatus(userId) {
-    try {
-      const { data } = await supabase
-        .from('dietitian_applications')
-        .select('status')
-        .eq('auth_user_id', userId)
-        .maybeSingle();
-      if (data) setApplicationStatus(data.status);
-    } catch { /* başvuru yoksa null kalır */ }
-  }
-
-  // Aktif ID, impersonate ediliyorsa onun ID'si, değilse kullanıcının kendi ID'sidir
-  const activeDietitianId = impersonatedDietitian?.id || user?.id;
-
-  async function fetchProfile(userId) {
-    if (isDemoMode) return;
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*, dietitians(*), must_change_password')
-        .eq('id', userId)
-        .single();
-
-      if (data) {
-        setProfile(data);
-      } else {
-        // users tablosunda kayıt yok — auth bilgilerinden fallback
-        console.warn('Profil bulunamadı, fallback profil kullanılıyor:', error?.message);
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        setProfile({
-          id: userId,
-          name: authUser?.user_metadata?.name || authUser?.email?.split('@')[0] || 'Kullanıcı',
-          email: authUser?.email,
-          role: 'dietitian',
-        });
-      }
-    } catch (err) {
-      console.error('Profil çekme hatası:', err);
-      setProfile({ id: userId, name: 'Kullanıcı', role: 'dietitian' });
-    }
-  }
+  // -- Auth actions --
 
   async function signIn(email, password) {
     if (isDemoMode) {
@@ -150,8 +152,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
 }
