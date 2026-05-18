@@ -199,20 +199,33 @@ export default function Dashboard() {
   const [deleteAppt, setDeleteAppt] = useState(null);   // appt obj
   const [feedbackMeal, setFeedbackMeal] = useState(null); // meal obj
 
-  useEffect(() => {
-    if (isDemo) return;
-    setLoading(true);
-    fetchDashboardData()
-      .then(() => fetchAlerts())
-      .finally(() => setLoading(false));
-    fetchClients();
-  }, [activeDietitianId]);
+  function getTimeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return mins + ' dk once';
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + ' saat once';
+    return Math.floor(hours / 24) + ' gun once';
+  }
+
+  function showToast(msg, type = 'success') {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  async function fetchClients() {
+    if (!activeDietitianId) return;
+    const { data } = await supabase
+      .from('clients')
+      .select('id, users(name)')
+      .eq('dietitian_id', activeDietitianId)
+      .order('created_at', { ascending: false });
+    if (data) setClients(data.map(c => ({ id: c.id, name: c.users?.name || 'Isimsiz' })));
+  }
 
   async function fetchAlerts() {
     if (!activeDietitianId) return;
-    // Otomatik uyari olustur
-    try { await supabase.rpc('generate_dietitian_alerts', { p_dietitian_id: activeDietitianId }); } catch {}
-    // Uyarilari cek
+    try { await supabase.rpc('generate_dietitian_alerts', { p_dietitian_id: activeDietitianId }); } catch (_e) { /* ignore */ }
     const { data } = await supabase
       .from('notifications')
       .select('*')
@@ -229,34 +242,10 @@ export default function Dashboard() {
         time: getTimeAgo(n.created_at),
       })));
       setStats(s => ({ ...s, criticalAlerts: data.length }));
-    } else if (!isDemo) {
+    } else {
       setAlerts([]);
       setStats(s => ({ ...s, criticalAlerts: 0 }));
     }
-  }
-
-  function getTimeAgo(dateStr) {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins} dk once`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} saat once`;
-    return `${Math.floor(hours / 24)} gun once`;
-  }
-
-  async function fetchClients() {
-    if (!activeDietitianId) return;
-    const { data } = await supabase
-      .from('clients')
-      .select('id, users(name)')
-      .eq('dietitian_id', activeDietitianId)
-      .order('created_at', { ascending: false });
-    if (data) setClients(data.map(c => ({ id: c.id, name: c.users?.name || 'İsimsiz' })));
-  }
-
-  function showToast(msg, type = 'success') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
   }
 
   async function fetchDashboardData() {
@@ -277,7 +266,7 @@ export default function Dashboard() {
           id: a.id,
           time: new Date(a.scheduled_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
           name: a.clients?.users?.name || 'Bilinmiyor',
-          type: a.type === 'in_person' ? 'Yüz yüze' : 'Online',
+          type: a.type === 'in_person' ? 'Yuz yuze' : 'Online',
           status: a.status,
           initials: (a.clients?.users?.name || 'XX').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
         })));
@@ -293,17 +282,29 @@ export default function Dashboard() {
       if (mealData?.length) {
         setMeals(mealData.map(m => ({
           id: m.id,
-          emoji: mealEmojis[m.meal_type] || '🍽️',
+          emoji: mealEmojis[m.meal_type] || '\uD83C\uDF7D',
           client: m.clients?.users?.name?.split(' ').map((n, i) => i === 0 ? n : n[0] + '.').join(' ') || '?',
-          meal: `${m.meal_type === 'breakfast' ? 'Kahvaltı' : m.meal_type === 'lunch' ? 'Öğle' : m.meal_type === 'dinner' ? 'Akşam' : 'Ara Öğün'} — ${m.note || 'Açıklama yok'}`,
+          meal: (m.meal_type === 'breakfast' ? 'Kahvalti' : m.meal_type === 'lunch' ? 'Ogle' : m.meal_type === 'dinner' ? 'Aksam' : 'Ara Ogun') + ' - ' + (m.note || 'Aciklama yok'),
           time: new Date(m.logged_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
           feedbackDone: !!m.dietitian_feedback,
         })));
       }
     } catch (err) {
-      console.error('Dashboard veri hatası:', err);
+      console.error('Dashboard veri hatasi:', err);
     }
   }
+
+  useEffect(() => {
+    if (isDemo) return;
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([
+      fetchDashboardData().then(() => { if (!cancelled) return fetchAlerts(); }),
+      fetchClients(),
+    ]).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDietitianId]);
 
   // ── Randevu ekleme ──────────────────────────────────────────────────────
   async function handleAddAppointment(form) {

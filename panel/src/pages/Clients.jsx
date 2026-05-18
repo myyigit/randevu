@@ -12,7 +12,7 @@ const DEMO_CLIENTS = [
   { id:'3', name:'Zeynep Arslan',initials:'ZA', weight:61, trend:'down',   change:'-1.3', goal:'Kilo Verme',   lastLog:'5 saat önce', email:'zeynep@demo.com',gender:'female', activity_level:'light' },
   { id:'4', name:'Burak Tekin',  initials:'BT', weight:94, trend:'down',   change:'-0.8', goal:'Kilo Verme',   lastLog:'1 gün önce',  email:'burak@demo.com', gender:'male',   activity_level:'sedentary' },
 ];
-const DEMO_WEIGHT = [
+const _DEMO_WEIGHT = [
   {date:'May 1',weight:74},{date:'May 8',weight:73.2},{date:'May 15',weight:72.8},
   {date:'May 22',weight:71.5},{date:'Haz 1',weight:71.0},{date:'Haz 8',weight:70.2},{date:'Haz 15',weight:72.1},
 ];
@@ -74,6 +74,7 @@ export default function Clients() {
 
   useEffect(() => {
     if (clientList.length > 0 && !selectedClient) setSelectedClient(clientList[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientList.length]);
 
   // ── Mesaj helper ──────────────────────────────────────────────────────────
@@ -237,7 +238,7 @@ export default function Clients() {
 
     const latestWeight = m.length > 0 ? m[0].weight_kg : '-';
     const latestFat = m.length > 0 ? (m[0].body_fat_pct || '-') : '-';
-    const latestWaist = m.length > 0 ? (m[0].waist_cm || '-') : '-';
+    // latestWaist available in measureRows below
 
     const mealRows = logs.slice(0, 20).map(log =>
       `<tr>

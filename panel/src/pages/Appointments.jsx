@@ -36,6 +36,7 @@ export default function Appointments() {
     if (isDemo) return;
     fetchAppointments();
     fetchClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeDietitianId]);
 
   async function fetchClients() {
@@ -84,7 +85,7 @@ export default function Appointments() {
     }
 
     try {
-      const { data: newId, error } = await supabase.rpc('add_appointment', {
+      const { error } = await supabase.rpc('add_appointment', {
         p_client_id: form.client_id, p_dietitian_id: activeDietitianId,
         p_scheduled_at: scheduledAt, p_duration_min: parseInt(form.duration),
         p_type: form.type, p_notes: form.notes || null,
@@ -169,7 +170,7 @@ export default function Appointments() {
 
       {/* Add Modal */}
       {showAdd && (
-        <div className="modal-overlay" onClick={()=>setShowAdd(false)}>
+        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowAdd(false); }}>
           <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:520}}>
             <div className="modal-header"><h3>📅 Yeni Randevu</h3><button className="modal-close" onClick={()=>setShowAdd(false)}>✕</button></div>
             <div className="modal-body">
