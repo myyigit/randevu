@@ -246,7 +246,7 @@ export default function Reports() {
       </div>
 
       {/* Grafikler - Satır 1 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div className="report-grid-2-1">
         {/* Haftalık Randevu Dağılımı */}
         <div style={cardStyle}>
           <div style={cardHeaderStyle}><h3 style={{ margin: 0, fontSize: 15 }}>📅 Günlere Göre Randevular</h3></div>
@@ -294,7 +294,7 @@ export default function Reports() {
       </div>
 
       {/* Grafikler - Satır 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div className="report-grid-3">
         {/* Randevu Türü */}
         <div style={cardStyle}>
           <div style={cardHeaderStyle}><h3 style={{ margin: 0, fontSize: 15 }}>🏥 Randevu Türü</h3></div>
@@ -444,14 +444,75 @@ export default function Reports() {
         </div>
       </div>
 
+      {/* Print başlık */}
+      <div className="print-header" style={{ display: 'none' }}>
+        <h1 style={{ margin: 0, fontSize: 22 }}>📊 DietSync — {periodLabels[period]} Raporu</h1>
+        <p style={{ margin: '4px 0 0', color: '#64748B', fontSize: 13 }}>
+          Oluşturulma: {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </p>
+        <hr style={{ border: 'none', borderTop: '2px solid #E2E8F0', margin: '12px 0' }} />
+      </div>
+
       {/* Print stili */}
       <style>{`
+        .report-grid-2-1 {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        .report-grid-3 {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+          .report-grid-2-1, .report-grid-3 {
+            grid-template-columns: 1fr !important;
+          }
+        }
         @media print {
-          .sidebar, .topbar, .notif-btn, .tabs, .btn { display: none !important; }
-          .main-content { margin: 0 !important; padding: 0 !important; }
-          .app-layout { display: block !important; }
-          .app-layout-inner { display: block !important; }
-          .stats-grid { grid-template-columns: repeat(4, 1fr) !important; }
+          /* Gizle */
+          .sidebar, .topbar, .notif-btn, .tabs, .btn,
+          .topbar-right, .app-layout > .impersonation-banner { display: none !important; }
+
+          /* Print başlık göster */
+          .print-header { display: block !important; margin-bottom: 16px; }
+
+          /* Layout düzelt */
+          html, body { background: white !important; color: black !important; font-size: 12px !important; }
+          .app-layout, .app-layout-inner { display: block !important; }
+          .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+          .page-content { padding: 0 !important; }
+
+          /* Stat kartları */
+          .stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 8px !important;
+            margin-bottom: 16px !important;
+          }
+          .stat-card {
+            padding: 12px !important;
+            border: 1px solid #CBD5E1 !important;
+            background: #F8FAFC !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Grafik grid'leri: 2 sütun */
+          .report-grid-2-1 { grid-template-columns: 1fr 1fr !important; }
+          .report-grid-3 { grid-template-columns: 1fr 1fr 1fr !important; }
+
+          /* Sayfa kırılması */
+          .recharts-wrapper { page-break-inside: avoid; }
+
+          /* Renkleri koru */
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+          /* Tablo */
+          .risk-table th { background: #F1F5F9 !important; }
+          .risk-table td, .risk-table th { border: 1px solid #CBD5E1 !important; padding: 8px !important; }
         }
       `}</style>
     </div>
