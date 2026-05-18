@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../contexts/useAuth';
 import { useClients, useMealLogs, useMeasurements, useDietPlans } from '../hooks/useSupabase';
@@ -12,10 +12,7 @@ const DEMO_CLIENTS = [
   { id:'3', name:'Zeynep Arslan',initials:'ZA', weight:61, trend:'down',   change:'-1.3', goal:'Kilo Verme',   lastLog:'5 saat önce', email:'zeynep@demo.com',gender:'female', activity_level:'light' },
   { id:'4', name:'Burak Tekin',  initials:'BT', weight:94, trend:'down',   change:'-0.8', goal:'Kilo Verme',   lastLog:'1 gün önce',  email:'burak@demo.com', gender:'male',   activity_level:'sedentary' },
 ];
-const _DEMO_WEIGHT = [
-  {date:'May 1',weight:74},{date:'May 8',weight:73.2},{date:'May 15',weight:72.8},
-  {date:'May 22',weight:71.5},{date:'Haz 1',weight:71.0},{date:'Haz 8',weight:70.2},{date:'Haz 15',weight:72.1},
-];
+
 const DEMO_MACROS = [
   {name:'Protein',value:30,color:'#22C55E'},
   {name:'Karbonhidrat',value:45,color:'#3B82F6'},
@@ -72,10 +69,9 @@ export default function Clients() {
     weight: m.weight_kg,
   }));
 
-  useEffect(() => {
-    if (clientList.length > 0 && !selectedClient) setSelectedClient(clientList[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientList.length]);
+  if (clientList.length > 0 && !selectedClient) {
+    setSelectedClient(clientList[0]);
+  }
 
   // ── Mesaj helper ──────────────────────────────────────────────────────────
   function showMsg(msg, type='success') {

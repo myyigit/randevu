@@ -74,7 +74,11 @@ export default function Appointments() {
   // ── Add ──
   async function handleAdd() {
     if (!form.client_id) { showMsg('Danışan seçin!','error'); return; }
-    const scheduledAt = `${form.date}T${form.time}:00`;
+    const tzOffset = new Date().getTimezoneOffset();
+    const tzSign = tzOffset > 0 ? '-' : '+';
+    const tzHours = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, '0');
+    const tzMins = String(Math.abs(tzOffset) % 60).padStart(2, '0');
+    const scheduledAt = `${form.date}T${form.time}:00${tzSign}${tzHours}:${tzMins}`;
 
     if (isDemo) {
       const cl = [{id:'d1',name:'Demo'}, ...clients].find(c=>c.id===form.client_id);

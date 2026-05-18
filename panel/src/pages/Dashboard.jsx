@@ -225,7 +225,7 @@ export default function Dashboard() {
 
   async function fetchAlerts() {
     if (!activeDietitianId) return;
-    try { await supabase.rpc('generate_dietitian_alerts', { p_dietitian_id: activeDietitianId }); } catch (_e) { /* ignore */ }
+    try { await supabase.rpc('generate_dietitian_alerts', { p_dietitian_id: activeDietitianId }); } catch { /* ignore */ }
     const { data } = await supabase
       .from('notifications')
       .select('*')
@@ -297,18 +297,24 @@ export default function Dashboard() {
   useEffect(() => {
     if (isDemo) return;
     let cancelled = false;
-    setLoading(true);
-    Promise.all([
-      fetchDashboardData().then(() => { if (!cancelled) return fetchAlerts(); }),
-      fetchClients(),
-    ]).finally(() => { if (!cancelled) setLoading(false); });
+    const load = async () => {
+      setLoading(true);
+      await Promise.all([fetchDashboardData(), fetchClients()]);
+      if (!cancelled) await fetchAlerts();
+      if (!cancelled) setLoading(false);
+    };
+    load();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeDietitianId]);
 
   // ── Randevu ekleme ──────────────────────────────────────────────────────
   async function handleAddAppointment(form) {
-    const scheduledAt = `${form.date}T${form.time}:00`;
+    const tzOffset = new Date().getTimezoneOffset();
+    const tzSign = tzOffset > 0 ? '-' : '+';
+    const tzHours = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, '0');
+    const tzMins = String(Math.abs(tzOffset) % 60).padStart(2, '0');
+    const scheduledAt = `${form.date}T${form.time}:00${tzSign}${tzHours}:${tzMins}`;
     const displayName = form.clientName || clients.find(c => c.id === form.clientId)?.name || 'Danışan';
     const newAppt = {
       id: Date.now(), time: form.time, name: displayName,
