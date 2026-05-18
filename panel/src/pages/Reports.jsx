@@ -505,9 +505,8 @@ export default function Reports() {
           .report-grid-3 { grid-template-columns: 1fr 1fr 1fr !important; }
 
           /* Sayfa kırılması ve recharts ortalama */
-          .recharts-wrapper { page-break-inside: avoid; margin: 0 auto !important; width: 100% !important; }
-          .recharts-surface { width: 100% !important; }
-          .recharts-responsive-container { display: flex !important; justify-content: center !important; width: 100% !important; }
+          .recharts-wrapper { page-break-inside: avoid; margin: 0 auto !important; position: static !important; }
+          .recharts-responsive-container { display: flex !important; justify-content: center !important; }
 
           /* Renkleri koru */
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
