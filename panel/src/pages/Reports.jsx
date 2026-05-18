@@ -15,110 +15,110 @@ export default function Reports() {
   const [appointments, setAppointments] = useState([]);
   const [mealLogs, setMealLogs] = useState([]);
   const [measurements, setMeasurements] = useState([]);
-
   // ── Veri Çekme ──
   useEffect(() => {
+    function getDateRange() {
+      const now = new Date();
+      const to = now.toISOString();
+      let from;
+      if (period === 'week') {
+        from = new Date(now.getTime() - 7 * 86400000).toISOString();
+      } else if (period === 'month') {
+        from = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).toISOString();
+      } else {
+        from = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString();
+      }
+      return { from, to };
+    }
+
+    function loadDemoData() {
+      setClients([
+        { id: '1', name: 'Fatma Kaya', goal: 'weight_loss', weight: 72 },
+        { id: '2', name: 'Ali Mert', goal: 'muscle_gain', weight: 85 },
+        { id: '3', name: 'Zeynep Arslan', goal: 'weight_loss', weight: 61 },
+        { id: '4', name: 'Burak Tekin', goal: 'weight_loss', weight: 94 },
+      ]);
+      setAppointments([
+        { status: 'confirmed', type: 'in_person', scheduled_at: '2026-05-10T09:00' },
+        { status: 'confirmed', type: 'online', scheduled_at: '2026-05-11T10:00' },
+        { status: 'done', type: 'in_person', scheduled_at: '2026-05-12T14:00' },
+        { status: 'cancelled', type: 'online', scheduled_at: '2026-05-13T09:00' },
+        { status: 'done', type: 'in_person', scheduled_at: '2026-05-14T11:00' },
+        { status: 'pending', type: 'online', scheduled_at: '2026-05-15T09:30' },
+        { status: 'confirmed', type: 'in_person', scheduled_at: '2026-05-16T14:00' },
+      ]);
+      setMealLogs([
+        { meal_type: 'breakfast', logged_at: '2026-05-10T08:00', dietitian_feedback: 'İyi' },
+        { meal_type: 'lunch', logged_at: '2026-05-10T12:00', dietitian_feedback: null },
+        { meal_type: 'dinner', logged_at: '2026-05-10T19:00', dietitian_feedback: null },
+        { meal_type: 'snack', logged_at: '2026-05-11T16:00', dietitian_feedback: 'Harika' },
+        { meal_type: 'breakfast', logged_at: '2026-05-12T08:30', dietitian_feedback: null },
+        { meal_type: 'lunch', logged_at: '2026-05-12T13:00', dietitian_feedback: null },
+      ]);
+      setMeasurements([
+        { weight_kg: 72, body_fat_pct: 28, measured_at: '2026-05-01' },
+        { weight_kg: 71.5, body_fat_pct: 27.5, measured_at: '2026-05-08' },
+        { weight_kg: 71, body_fat_pct: 27, measured_at: '2026-05-15' },
+      ]);
+      setLoading(false);
+    }
+
+    async function fetchClients() {
+      const { data } = await supabase
+        .from('clients')
+        .select('id, goal, users(name), measurements(weight_kg)')
+        .eq('dietitian_id', activeDietitianId);
+      if (data) setClients(data.map(c => ({
+        id: c.id, name: c.users?.name || 'İsimsiz', goal: c.goal,
+        weight: c.measurements?.[0]?.weight_kg || 0,
+      })));
+    }
+
+    async function fetchAppointments() {
+      const { from } = getDateRange();
+      const { data } = await supabase
+        .from('appointments')
+        .select('status, type, scheduled_at')
+        .eq('dietitian_id', activeDietitianId)
+        .gte('scheduled_at', from)
+        .order('scheduled_at', { ascending: true });
+      if (data) setAppointments(data);
+    }
+
+    async function fetchMealLogs() {
+      const { from } = getDateRange();
+      const { data } = await supabase
+        .from('meal_logs')
+        .select('meal_type, logged_at, dietitian_feedback, clients!inner(dietitian_id)')
+        .eq('clients.dietitian_id', activeDietitianId)
+        .gte('logged_at', from);
+      if (data) setMealLogs(data);
+    }
+
+    async function fetchMeasurements() {
+      const { from } = getDateRange();
+      const { data } = await supabase
+        .from('measurements')
+        .select('weight_kg, body_fat_pct, measured_at, clients!inner(dietitian_id)')
+        .eq('clients.dietitian_id', activeDietitianId)
+        .gte('measured_at', from)
+        .order('measured_at', { ascending: true });
+      if (data) setMeasurements(data);
+    }
+
     if (isDemo) {
-      loadDemoData();
+      setTimeout(() => loadDemoData(), 0);
       return;
     }
+    
     const load = async () => {
       setLoading(true);
       await Promise.all([fetchClients(), fetchAppointments(), fetchMealLogs(), fetchMeasurements()]);
       setLoading(false);
     };
+    
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDietitianId, period]);
-
-  function getDateRange() {
-    const now = new Date();
-    const to = now.toISOString();
-    let from;
-    if (period === 'week') {
-      from = new Date(now.getTime() - 7 * 86400000).toISOString();
-    } else if (period === 'month') {
-      from = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).toISOString();
-    } else {
-      from = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString();
-    }
-    return { from, to };
-  }
-
-  function loadDemoData() {
-    setClients([
-      { id: '1', name: 'Fatma Kaya', goal: 'weight_loss', weight: 72 },
-      { id: '2', name: 'Ali Mert', goal: 'muscle_gain', weight: 85 },
-      { id: '3', name: 'Zeynep Arslan', goal: 'weight_loss', weight: 61 },
-      { id: '4', name: 'Burak Tekin', goal: 'weight_loss', weight: 94 },
-    ]);
-    setAppointments([
-      { status: 'confirmed', type: 'in_person', scheduled_at: '2026-05-10T09:00' },
-      { status: 'confirmed', type: 'online', scheduled_at: '2026-05-11T10:00' },
-      { status: 'done', type: 'in_person', scheduled_at: '2026-05-12T14:00' },
-      { status: 'cancelled', type: 'online', scheduled_at: '2026-05-13T09:00' },
-      { status: 'done', type: 'in_person', scheduled_at: '2026-05-14T11:00' },
-      { status: 'pending', type: 'online', scheduled_at: '2026-05-15T09:30' },
-      { status: 'confirmed', type: 'in_person', scheduled_at: '2026-05-16T14:00' },
-    ]);
-    setMealLogs([
-      { meal_type: 'breakfast', logged_at: '2026-05-10T08:00', dietitian_feedback: 'İyi' },
-      { meal_type: 'lunch', logged_at: '2026-05-10T12:00', dietitian_feedback: null },
-      { meal_type: 'dinner', logged_at: '2026-05-10T19:00', dietitian_feedback: null },
-      { meal_type: 'snack', logged_at: '2026-05-11T16:00', dietitian_feedback: 'Harika' },
-      { meal_type: 'breakfast', logged_at: '2026-05-12T08:30', dietitian_feedback: null },
-      { meal_type: 'lunch', logged_at: '2026-05-12T13:00', dietitian_feedback: null },
-    ]);
-    setMeasurements([
-      { weight_kg: 72, body_fat_pct: 28, measured_at: '2026-05-01' },
-      { weight_kg: 71.5, body_fat_pct: 27.5, measured_at: '2026-05-08' },
-      { weight_kg: 71, body_fat_pct: 27, measured_at: '2026-05-15' },
-    ]);
-    setLoading(false);
-  }
-
-  async function fetchClients() {
-    const { data } = await supabase
-      .from('clients')
-      .select('id, goal, users(name), measurements(weight_kg)')
-      .eq('dietitian_id', activeDietitianId);
-    if (data) setClients(data.map(c => ({
-      id: c.id, name: c.users?.name || 'İsimsiz', goal: c.goal,
-      weight: c.measurements?.[0]?.weight_kg || 0,
-    })));
-  }
-
-  async function fetchAppointments() {
-    const { from } = getDateRange();
-    const { data } = await supabase
-      .from('appointments')
-      .select('status, type, scheduled_at')
-      .eq('dietitian_id', activeDietitianId)
-      .gte('scheduled_at', from)
-      .order('scheduled_at', { ascending: true });
-    if (data) setAppointments(data);
-  }
-
-  async function fetchMealLogs() {
-    const { from } = getDateRange();
-    const { data } = await supabase
-      .from('meal_logs')
-      .select('meal_type, logged_at, dietitian_feedback, clients!inner(dietitian_id)')
-      .eq('clients.dietitian_id', activeDietitianId)
-      .gte('logged_at', from);
-    if (data) setMealLogs(data);
-  }
-
-  async function fetchMeasurements() {
-    const { from } = getDateRange();
-    const { data } = await supabase
-      .from('measurements')
-      .select('weight_kg, body_fat_pct, measured_at, clients!inner(dietitian_id)')
-      .eq('clients.dietitian_id', activeDietitianId)
-      .gte('measured_at', from)
-      .order('measured_at', { ascending: true });
-    if (data) setMeasurements(data);
-  }
+  }, [activeDietitianId, period, isDemo]);
 
   // ── Hesaplamalar ──
   const apptStats = useMemo(() => {
