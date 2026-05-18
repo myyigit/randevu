@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/useAuth';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import { supabase } from './lib/supabase';
 import Clients from './pages/Clients';
 import Appointments from './pages/Appointments';
 import DietPlans from './pages/DietPlans';
@@ -18,7 +19,7 @@ import ClientWater from './pages/client/ClientWater';
 import ClientAppointments from './pages/client/ClientAppointments';
 import ClientProfile from './pages/client/ClientProfile';
 import ChangePassword from './pages/client/ChangePassword';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './index.css';
 
 
@@ -84,6 +85,30 @@ function Sidebar() {
 }
 
 function TopBar({ title, subtitle }) {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [alertCount, setAlertCount] = useState(0);
+  const { activeDietitianId } = useAuth();
+
+  // Bildirim sayısını çek
+  useEffect(() => {
+    if (!activeDietitianId) return;
+    supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', activeDietitianId)
+      .eq('is_read', false)
+      .then(({ count }) => { if (count != null) setAlertCount(count); });
+  }, [activeDietitianId]);
+
+  function handleSearch(e) {
+    if (e.key !== 'Enter' || !searchQuery.trim()) return;
+    const q = searchQuery.trim().toLowerCase();
+    // Danışan araması → Danışanlar sayfasına yönlendir
+    navigate('/clients?search=' + encodeURIComponent(q));
+    setSearchQuery('');
+  }
+
   return (
     <div className="topbar">
       <div className="topbar-left">
@@ -93,11 +118,17 @@ function TopBar({ title, subtitle }) {
       <div className="topbar-right">
         <div className="search-box">
           <span>&#x1F50D;</span>
-          <input type="text" placeholder="Danışan, plan, besin ara..." />
+          <input
+            type="text"
+            placeholder="Danışan ara... (Enter)"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+          />
         </div>
-        <button className="notif-btn">
+        <button className="notif-btn" onClick={() => navigate('/')} title="Bildirimleri göster">
           &#x1F514;
-          <span className="notif-badge">3</span>
+          {alertCount > 0 && <span className="notif-badge">{alertCount}</span>}
         </button>
       </div>
     </div>

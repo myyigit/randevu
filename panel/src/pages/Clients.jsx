@@ -46,7 +46,8 @@ export default function Clients() {
 
   const [selectedClient, setSelectedClient] = useState(null);
   const [activeTab, setActiveTab]           = useState('overview');
-  const [search, setSearch]                 = useState('');
+  const urlSearch = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('search') || '';
+  const [search, setSearch]                 = useState(urlSearch);
   const [toast, setToast]                   = useState(null);
 
   // ── Modal state ────────────────────────────────────────────────────────────
